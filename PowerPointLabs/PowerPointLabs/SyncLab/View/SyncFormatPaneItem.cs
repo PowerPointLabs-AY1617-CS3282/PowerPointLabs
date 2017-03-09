@@ -1,11 +1,9 @@
-﻿using Microsoft.Office.Interop.PowerPoint;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+
+using Microsoft.Office.Interop.PowerPoint;
 
 namespace PowerPointLabs.SyncLab.View
 {
@@ -86,6 +84,11 @@ namespace PowerPointLabs.SyncLab.View
                 return;
             }
             this.formats = dialog.Formats;
+        }
+
+        public void Dispose()
+        {
+            shape.Delete();
         }
     }
 }

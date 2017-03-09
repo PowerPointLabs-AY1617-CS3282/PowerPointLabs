@@ -1,9 +1,6 @@
-﻿using PowerPointLabs.SyncLab.ObjectFormats;
-using PowerPointLabs.SyncLab.View;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
+using PowerPointLabs.SyncLab.ObjectFormats;
+using Shape = Microsoft.Office.Interop.PowerPoint.Shape;
 
 namespace PowerPointLabs.SyncLab
 {
@@ -86,7 +83,7 @@ namespace PowerPointLabs.SyncLab
         }
 
         public FormatTreeNode Clone(FormatTreeNode parent)
-        {
+        { // recursively clone the nodes
             FormatTreeNode cloned = null;
             if (this.format != null)
             {

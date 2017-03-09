@@ -1,16 +1,11 @@
-﻿using Microsoft.Office.Interop.PowerPoint;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
+
+using Microsoft.Office.Interop.PowerPoint;
+using PowerPointLabs.Models;
+using PowerPointLabs.Utils;
 
 namespace PowerPointLabs.SyncLab.View
 {
@@ -21,9 +16,12 @@ namespace PowerPointLabs.SyncLab.View
     {
 #pragma warning disable 0618
 
+        private static readonly string StorageTemplateName = "Sync Labs - Do not edit";
+
         public SyncPaneWPF()
         {
             InitializeComponent();
+            ClearStorageTemplate();
             copyImage.Source = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
                     Properties.Resources.LineColor_icon.GetHbitmap(),
                     IntPtr.Zero,
@@ -37,27 +35,6 @@ namespace PowerPointLabs.SyncLab.View
         }
 
         #region GUI Handles
-        /*private void CopyImage_MouseLeftButtonUp(object sender, RoutedEventArgs e)
-        {
-            if (!Globals.ThisAddIn.Application.ActiveWindow.Selection.HasChildShapeRange ||
-                Globals.ThisAddIn.Application.ActiveWindow.Selection.ShapeRange.Count != 1)
-            {
-                MessageBox.Show("Please select one item to copy.");
-                return;
-            }
-            var shape = Globals.ThisAddIn.Application.ActiveWindow.Selection.ShapeRange[1];
-            SyncFormatDialog dialog = new SyncFormatDialog(shape);
-            bool? result = dialog.ShowDialog();
-            MessageBox.Show(result.ToString());
-            if (!result.HasValue || !(bool)result)
-            {
-                return;
-            }
-            SyncFormatListItem item = new SyncFormatListItem();
-            item.Image = new System.Drawing.Bitmap(Utils.Graphics.ShapeToImage(shape));
-            formatListBox.Items.Insert(0, item);
-        }*/
-
         private void CopyButton_Click(object sender, RoutedEventArgs e)
         {
             if (Globals.ThisAddIn.Application.ActiveWindow.Selection.ShapeRange.Count != 1)
@@ -72,7 +49,7 @@ namespace PowerPointLabs.SyncLab.View
             {
                 return;
             }
-            SyncFormatPaneItem item = new SyncFormatPaneItem(formatListBox, shape, dialog.Formats);
+            SyncFormatPaneItem item = new SyncFormatPaneItem(formatListBox, CopyShape(shape), dialog.Formats);
             item.Image = new System.Drawing.Bitmap(Utils.Graphics.ShapeToImage(shape));
             formatListBox.Items.Insert(0, item);
         }
@@ -87,8 +64,8 @@ namespace PowerPointLabs.SyncLab.View
                     foreach (Shape shape in Globals.ThisAddIn.Application.ActiveWindow.Selection.ShapeRange)
                     {
                         ApplyFormats(item.Formats, item.FormatShape, shape);
-                        break;
                     }
+                    break;
                 }
             }
         }
@@ -118,9 +95,30 @@ namespace PowerPointLabs.SyncLab.View
             }
         }
 
+        #region Shape Saving
+
         private Shape CopyShape(Shape shape)
         {
-            return shape;
+            Design design = Graphics.GetDesign(StorageTemplateName);
+            if (design == null)
+            {
+                design = Graphics.CreateDesign(StorageTemplateName);
+            }
+            shape.Copy();
+            ShapeRange newShapeRange = design.TitleMaster.Shapes.Paste();
+            return newShapeRange[1];
         }
+
+
+        private void ClearStorageTemplate()
+        {
+            Design design = Graphics.GetDesign(StorageTemplateName);
+            if (design != null)
+            {
+                design.Delete();
+            }
+        }
+        #endregion
+
     }
 }
